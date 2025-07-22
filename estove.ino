@@ -1,31 +1,31 @@
 #include "max6675.h"
 
-// Define GPIO pins
-int thermoCLK = 18;   // SCK
-int thermoCS  = 5;    // CS
-int thermoDO  = 19;   // SO
+int thermoCLK = 18;
+int thermoCS = 5;
+int thermoDO = 19;
 
-// Create thermocouple instance
+int relayPin = 23;  // GPIO23 for relay
+
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 void setup() {
   Serial.begin(115200);
-  delay(500);  // wait for MAX6675 to stabilize
-  Serial.println("Thermocouple ready!");
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);  // initially OFF
 }
 
 void loop() {
-  // Read temperature in Celsius
-  float temperatureC = thermocouple.readCelsius();
-  
-  // Read temperature in Fahrenheit (optional)
-  float temperatureF = thermocouple.readFahrenheit();
-
+  float temp = thermocouple.readCelsius();
   Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.print(" °C  |  ");
-  Serial.print(temperatureF);
-  Serial.println(" °F");
+  Serial.println(temp);
 
-  delay(1000); // 1 second delay
+  if (temp < 90) { // You can change to your cooking target
+    digitalWrite(relayPin, HIGH);  // Turn heater ON
+    Serial.println("Cooking… Heater ON");
+  } else {
+    digitalWrite(relayPin, LOW);   // Turn heater OFF
+    Serial.println("Cooking done! Heater OFF");
+  }
+
+  delay(1000);
 }
